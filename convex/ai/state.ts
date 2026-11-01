@@ -16,7 +16,7 @@ export const STAFF = ["ORGANIZER", "STAFF"] as const;
 export function inputHash(report: Doc<"reports">) {
   return bytesToHex(sha256(new TextEncoder().encode(JSON.stringify([report.description, report.priority ?? null, report.imageStorageId ?? null, report.location, report.pinX, report.pinY]))));
 }
-export const enabled = () => env.EVENTPULSE_AI_ENABLED === "true" && Boolean(env.OPENAI_API_KEY && env.OPENAI_TEXT_MODEL);
+export const enabled = () => (env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true") && Boolean(env.OPENAI_API_KEY && env.OPENAI_TEXT_MODEL);
 
 export const settings = query({
   args: { eventId: v.id("events") },

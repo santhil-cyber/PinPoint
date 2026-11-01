@@ -4,6 +4,9 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { requireMembership, requireRole } from "./lib/authz";
 import { PRIORITY_ORDER, clampPercent, inferLocation } from "./lib/geo";
+import { classifyIncident } from "./lib/intakeRules";
+import { duplicateScore, DEDUP_WINDOW_MS } from "./lib/dedup";
+import { executeCreateOrUpdateIncident } from "./agents/intake";
 import { reportGroup, sourcePriority } from "./lib/reportGroup";
 import { normalizedDescription } from "./lib/dedup";
 import { priorityValidator } from "./schema";
@@ -93,18 +96,20 @@ async function groupedCards(ctx: QueryCtx, reports: Doc<"reports">[], callerId: 
   const seen = new Set<string>();
   const cards = [];
   for (const report of reports) {
-    const { original, incidentId } = await reportGroup(ctx, report);
-    const key = incidentId ?? original._id;
+    const { original, incidentId, incidentIds, unlinkedReports } = await reportGroup(ctx, report);
+    const key = original._id;
     if (seen.has(key)) continue;
     seen.add(key);
     const evidence: Doc<"reports">[] = [];
-    if (incidentId) {
-      const links = await ctx.db.query("incidentReports").withIndex("by_incident", q => q.eq("incidentId", incidentId)).take(1001);
+    for (const groupIncidentId of incidentIds) {
+      const links = await ctx.db.query("incidentReports").withIndex("by_incident", q => q.eq("incidentId", groupIncidentId)).take(1001);
       for (const link of links.slice(0, 1000)) {
         const item = await ctx.db.get("reports", link.reportId);
         if (item?.eventId === original.eventId) evidence.push(item);
       }
-    } else evidence.push(original);
+    }
+    evidence.push(...unlinkedReports.filter(item => !evidence.some(r => r._id === item._id)));
+    if (!evidence.length) evidence.push(original);
     const people = await reporterIndex(ctx, original.eventId, [original, ...evidence]);
     const eligible = evidence.filter(r => r.status !== "rejected" && !people.get(r.reporterId)?.banned);
     const reporterCount = original.status === "rejected" ? 0 : new Set(eligible.map(r => r.reporterId)).size;
@@ -234,6 +239,16 @@ export const create = mutation({
       createdAt: Date.now(),
     });
 
+    // Materialize clear matches in this transaction so a second card never
+    // appears while asynchronous NLP is queued or the provider is unavailable.
+    const classification = classifyIncident(description);
+    const nearby = await ctx.db.query("incidents").withIndex("by_event_created", q =>
+      q.eq("eventId", args.eventId).gte("createdAt", Date.now() - DEDUP_WINDOW_MS)).order("desc").take(100);
+    const hasClearMatch = nearby.some(item => !item.isResolved && duplicateScore({ description, pinX, pinY, ...classification }, item) > 0);
+    if (hasClearMatch || nearby.length === 0) {
+      await executeCreateOrUpdateIncident(ctx, { eventId: args.eventId, reportId, description, pinX, pinY, location,
+        ...classification, hasImageEvidence: Boolean(args.imageStorageId || imageUrl), imageStorageId: args.imageStorageId, imageUrl });
+    }
     await ctx.scheduler.runAfter(0, internal.ai.semanticIntake.processNewReport, { reportId });
 
     return reportId;
@@ -292,9 +307,9 @@ export const updateStatus = mutation({
     assertTransition(report, args.status);
 
     if (args.status === "resolved") {
-      await ctx.db.patch("reports", report._id, { resolved: true });
       const group = await reportGroup(ctx, report);
-      if (group.incidentId) await ctx.db.patch("incidents", group.incidentId, {
+      await ctx.db.patch("reports", report._id, { resolved: true });
+      for (const id of group.incidentIds) await ctx.db.patch("incidents", id, {
         isResolved: true, resolvedAt: Date.now(), resolvedBy: moderator.userId,
       });
       return null;

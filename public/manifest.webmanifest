@@ -1,6 +1,6 @@
 {
-  "name": "EventPulse emergency staff console",
-  "short_name": "EventPulse",
+  "name": "PINPOINT emergency staff console",
+  "short_name": "PINPOINT",
   "description": "Live incident alerts and response coordination for event staff.",
   "start_url": "/",
   "scope": "/",

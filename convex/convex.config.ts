@@ -10,6 +10,7 @@ const app = defineApp({ env: {
   OPENAI_TEXT_MODEL: v.optional(v.string()),
   OPENAI_VISION_MODEL: v.optional(v.string()),
   OPENAI_EMBEDDING_MODEL: v.optional(v.string()),
+  PINPOINT_AI_ENABLED: v.optional(v.string()),
   EVENTPULSE_AI_ENABLED: v.optional(v.string()),
 } });
 app.use(workpool, { name: "aiWorkpool" });

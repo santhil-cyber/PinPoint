@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation, query, type MutationCtx } from "./_generated/server";
+import { env, mutation, query, type MutationCtx } from "./_generated/server";
 import { requireMembership, requireRole, requireUser } from "./lib/authz";
 import { assertEventTimes } from "./lib/time";
+import { enabled as aiEnabled } from "./ai/state";
 
 /** Crockford-ish: no 0/O/1/I/L, so a code read aloud or off a screen is unambiguous. */
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -56,6 +57,7 @@ async function mintCode(ctx: MutationCtx, length: number, taken: string[]): Prom
 }
 
 export const create = mutation({
+  returns: v.object({ eventId: v.id("events"), attendeeCode: v.string(), staffCode: v.string() }),
   args: {
     name: v.string(),
     venue: v.string(),
@@ -122,6 +124,19 @@ export const create = mutation({
       joinedAt: now,
       lastOpenedAt: now,
     });
+
+    // When the deployment has an AI provider configured, new events start in
+    // assist mode so triage runs without a trip to the AI settings panel.
+    if (aiEnabled()) {
+      await ctx.db.insert("aiSettings", {
+        eventId,
+        mode: "assist",
+        visionEnabled: Boolean(env.OPENAI_VISION_MODEL),
+        ragEnabled: false,
+        updatedBy: userId,
+        updatedAt: now,
+      });
+    }
 
     return { eventId, attendeeCode, staffCode };
   },

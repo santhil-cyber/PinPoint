@@ -3,6 +3,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery, type MutationCtx } from "../_generated/server";
 import { logAgentAction } from "../lib/agentLog";
 import { canMarkVerified, shouldAlertNearbyStaff } from "../lib/safety";
+import { reportGroup } from "../lib/reportGroup";
 import { THRESHOLDS } from "../lib/verificationThresholds";
 import { ACTIVE_TASKS, rankResponders } from "../lib/dispatchPolicy";
 import { executeAssignResponder } from "./dispatch";
@@ -21,7 +22,7 @@ export const check_source_independence = internalQuery({
       .take(100);
 
     const original = links[0] ? await ctx.db.get("reports", links[0].reportId) : null;
-    const groupRejected = original?.status === "rejected";
+    const groupRejected = original ? (await reportGroup(ctx, original)).original.status === "rejected" : false;
     const reportIds = links.map((l) => l.reportId);
     const reports: Doc<"reports">[] = [];
     for (const rId of reportIds) {
@@ -205,7 +206,7 @@ export const evaluateIncident = internalMutation({
       .take(100);
 
     const original = links[0] ? await ctx.db.get("reports", links[0].reportId) : null;
-    const groupRejected = original?.status === "rejected";
+    const groupRejected = original ? (await reportGroup(ctx, original)).original.status === "rejected" : false;
     const reportIds = links.map((l) => l.reportId);
     const reports: Doc<"reports">[] = [];
     for (const rId of reportIds) {

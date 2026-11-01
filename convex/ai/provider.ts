@@ -15,7 +15,8 @@ Never verify an incident, authorize dispatch, provide a diagnosis or generate ev
 A suggested severity is triage advice, not operational authority. Uncertain/conflicting evidence needs human review.`;
 
 function model(modelId: string) {
-  if (env.EVENTPULSE_AI_ENABLED !== "true" || !env.OPENAI_API_KEY) throw new Error("ai_disabled");
+  const isAiEnabled = env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true";
+  if (!isAiEnabled || !env.OPENAI_API_KEY) throw new Error("ai_disabled");
   const options = { apiKey: env.OPENAI_API_KEY, model: modelId,
     configuration: { baseURL: providerBaseUrl() },
     maxRetries: 0, timeout: 20_000, maxTokens: 1800,
@@ -44,7 +45,8 @@ export async function analyzeInput(description: string, imageDataUrl?: string) {
   return { output, model: modelId, inputTokens: usage?.input_tokens, outputTokens: usage?.output_tokens };
 }
 export function embeddingModelId() {
-  if (!env.OPENAI_EMBEDDING_MODEL || !env.OPENAI_API_KEY || env.EVENTPULSE_AI_ENABLED !== "true") throw new Error("embeddings_not_configured");
+  const isAiEnabled = env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true";
+  if (!env.OPENAI_EMBEDDING_MODEL || !env.OPENAI_API_KEY || !isAiEnabled) throw new Error("embeddings_not_configured");
   return env.OPENAI_EMBEDDING_MODEL;
 }
 export async function embedTexts(texts: string[]) {

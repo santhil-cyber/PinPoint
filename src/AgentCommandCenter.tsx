@@ -316,7 +316,7 @@ export function AgentCommandCenter({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `eventpulse_audit_trail_${Date.now()}.csv`);
+    link.setAttribute("download", `pinpoint_audit_trail_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -333,7 +333,7 @@ export function AgentCommandCenter({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `eventpulse_audit_trail_${Date.now()}.json`);
+    link.setAttribute("download", `pinpoint_audit_trail_${Date.now()}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -391,7 +391,7 @@ export function AgentCommandCenter({
     mapDragRef.current = null;
   };
 
-  // Badges aligned with EventPulse palette
+  // Badges aligned with PINPOINT palette
   const getAgentBadge = (agent: string) => {
     switch (agent) {
       case "intake": return { label: "1. Intake", bg: "bg-blue-50 text-blue-700 border-blue-200" };
@@ -1265,7 +1265,7 @@ export function AgentCommandCenter({
           <div className="w-full max-w-2xl rounded-[28px] p-6 shadow-2xl space-y-5 bg-[var(--surface)] border border-[rgba(0,0,0,0.08)] text-[color:var(--ink)] max-h-[88vh] overflow-y-auto custom-scrollbar" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-[color:var(--border)] pb-4">
               <div>
-                <h3 className="text-base font-bold text-[color:var(--ink)]">EventPulse Multi-Agent Safety Architecture</h3>
+                <h3 className="text-base font-bold text-[color:var(--ink)]">PINPOINT Multi-Agent Safety Architecture</h3>
                 <p className="text-xs text-[color:var(--muted)] mt-0.5">End-to-End Autonomous Incident Lifecycle with Human Safety Gates</p>
               </div>
               <button onClick={() => setIsGuideOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer hover:brightness-95" style={{ background: "var(--surface-3)", color: "var(--muted-2)" }} aria-label="Close">

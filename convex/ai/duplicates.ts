@@ -11,7 +11,8 @@ export const recordCandidates = internalMutation({
     const analysis = await ctx.db.get("aiAnalyses", args.analysisId);
     if (!analysis || analysis.status !== "completed" || args.attempt !== analysis.attempts || args.model !== env.OPENAI_EMBEDDING_MODEL) return;
     const config = await ctx.db.query("aiSettings").withIndex("by_eventId", q => q.eq("eventId", analysis.eventId)).unique();
-    if (!config || config.mode !== analysis.mode || config.mode === "off" || env.EVENTPULSE_AI_ENABLED !== "true") return;
+    const isAiEnabled = env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true";
+    if (!config || config.mode !== analysis.mode || config.mode === "off" || !isAiEnabled) return;
     const incident = await ctx.db.get("incidents", analysis.incidentId);
     const report = await ctx.db.get("reports", analysis.reportId);
     if (!incident || incident.isResolved || !report || report.status === "rejected") return;

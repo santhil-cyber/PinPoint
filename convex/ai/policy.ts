@@ -3,7 +3,7 @@ export const ANALYSIS_VERSION = "intake-v1";
 export const EMBEDDING_DIMENSIONS = 1536;
 export const MAX_KNOWLEDGE_CHUNKS = 32;
 export const MAX_KNOWLEDGE_TEXT = 40_000;
-export const PROMPT_VERSION = "eventpulse-intake-2026-10-29";
+export const PROMPT_VERSION = "pinpoint-intake-2026-10-29";
 
 export function splitKnowledge(text: string): string[] {
   const normalized = text.replace(/\r\n/g, "\n").trim();

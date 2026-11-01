@@ -34,3 +34,5 @@ reference-v2/
 *.sw?
 .agents/
 .claude/
+.vercel
+.env*

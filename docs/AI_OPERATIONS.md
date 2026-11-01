@@ -1,4 +1,4 @@
-# EventPulse AI and agent operations
+# PINPOINT AI and agent operations
 
 This implementation covers the plan's sections 6–8: optional OpenAI/LangChain enrichment, approved-source RAG, and the five-stage incident workflow. It is implemented and locally tested; production activation still requires the staging checks below. Local backend deployment and live provider connectivity have now been checked. No production deployment was performed.
 
@@ -35,7 +35,7 @@ Set these **on the target Convex deployment**, never in `VITE_*` variables or br
 
 | Variable | Purpose |
 | --- | --- |
-| `EVENTPULSE_AI_ENABLED` | Exact value `true` enables configured AI; any other value is the deployment kill switch. |
+| `PINPOINT_AI_ENABLED` (or `EVENTPULSE_AI_ENABLED`) | Exact value `true` enables configured AI; any other value is the deployment kill switch. |
 | `OPENAI_API_KEY` | Server-side credential for the selected provider project. |
 | `OPENAI_BASE_URL` | Optional HTTPS API root for a compatible provider; absent uses OpenAI. |
 | `OPENAI_API_MODE` | `responses` (default) or `chat`. Chat mode explicitly uses LangChain ChatOpenAICompletions to prevent model-name heuristics selecting Responses. |
@@ -195,3 +195,19 @@ priority at 5. These are count-based review recommendations, not automatic
 severity changes or verification. An explicit staff priority takes precedence
 in sorting; counts break ties. Groups display up to 1,000 evidence records; the
 UI marks the count with + when it is a lower bound.
+
+
+### Production deduplication correction (2026-10-30)
+
+The Vercel app at https://eventpulse-zeta.vercel.app uses the production backend
+`hearty-bullfrog-323`, independently of the local anonymous backend. The grouping
+and count implementation was deployed there and verified against existing reports.
+The observed `fire breakout` and `Fire lag gyi hai` pair returns one original
+card with two reports from two eligible people.
+
+Short affirmative English/Hinglish/Hindi fire-outbreak phrases, including the
+`firee` typo, share a canonical meaning. Place qualifiers and negations are not
+removed. Clear matches are linked during submission, before async NLP. Existing
+short fire reports created within 60 seconds and 10 map percentage points also
+reconcile onto the first card, including reports already linked to different
+incident IDs. Distant incidents and resolved incidents stay separate.

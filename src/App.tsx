@@ -22,7 +22,7 @@ import { AgentCommandCenter } from "./AgentCommandCenter";
 // index.css that every palette token reads. A tiny subscriber store lets the
 // toggle button re-render without threading context through the whole tree.
 type Theme = "light" | "dark";
-const THEME_KEY = "eventpulse-theme";
+const THEME_KEY = "pinpoint-theme";
 
 function readTheme(): Theme {
   if (typeof window === "undefined") return "light";
@@ -205,7 +205,7 @@ function timeAgo(createdAt: number, now: number): string {
  * from memberships.listMine. If storage is unavailable the safe default is
  * the role picker.
  */
-const WORKSPACE_FLAG = "eventpulse.inWorkspace";
+const WORKSPACE_FLAG = "pinpoint.inWorkspace";
 function readWorkspaceFlag(): boolean {
   try { return sessionStorage.getItem(WORKSPACE_FLAG) === "1"; } catch { return false; }
 }
@@ -636,8 +636,8 @@ function NotificationPanel({ notifications, onClose, onDismiss }: { notification
 // ─────────────────────────────────────────────────────────────────────────────
 // Staff emergency alerts
 // ─────────────────────────────────────────────────────────────────────────────
-const STAFF_SOUND_KEY = "eventpulse.staffEmergencySound";
-const STAFF_NOTIFICATION_KEY = "eventpulse.staffPhoneNotifications";
+const STAFF_SOUND_KEY = "pinpoint.staffEmergencySound";
+const STAFF_NOTIFICATION_KEY = "pinpoint.staffPhoneNotifications";
 /** The phone keeps ringing until the staff member acknowledges, up to this long. */
 const RING_TIMEOUT_MS = 45_000;
 const RING_INTERVAL_MS = 1_600;
@@ -671,7 +671,7 @@ async function showIncidentNotification(incident: IncidentAlertRow): Promise<voi
   // missing from TypeScript's NotificationOptions.
   const options = {
     body: `${incident.severity.toUpperCase()} at ${incident.location}: ${incident.description}`,
-    tag: `eventpulse-${incident._id}`,
+    tag: `pinpoint-${incident._id}`,
     requireInteraction: true,
     renotify: true,
     vibrate: RING_VIBRATION,
@@ -1344,7 +1344,7 @@ function LoginScreen({ onLogin, onGuestLogin }: { onLogin: () => Promise<unknown
             <path d="M15.5 8.5v7l5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h1 className="mt-4 text-[32px] leading-none font-bold" style={{ color: ink, letterSpacing: "-0.035em" }}>Event Pulse</h1>
+        <h1 className="mt-4 text-[32px] leading-none font-bold" style={{ color: ink, letterSpacing: "-0.035em" }}>PINPOINT</h1>
         <p className="mt-3 text-base" style={{ color: muted }}>Smart event incident management</p>
       </div>
       {/* Natural size when it fits; the only block allowed to shrink, so on a
@@ -1403,7 +1403,7 @@ function SplashScreen() {
           <path d="M15 8v7l4 4" stroke="white" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </div>
-      <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: dimmed }}>Event Pulse</p>
+      <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: dimmed }}>PINPOINT</p>
     </div>
   );
 }
@@ -1617,7 +1617,7 @@ function CreateStep1({ eventData, onChange, onNext, onBack }: { eventData: Parti
         <h2 className="text-xl font-bold mt-1" style={{ color: ink, letterSpacing: "-0.02em" }}>Event Details</h2>
       </div>
       <div className="flex flex-col gap-4 flex-1">
-        {[{ label: "Event Name", key: "name", placeholder: "Event Pulse '26", type: "text" },
+        {[{ label: "Event Name", key: "name", placeholder: "PINPOINT '26", type: "text" },
           { label: "Venue", key: "venue", placeholder: "IIT Delhi, New Delhi", type: "text" }].map(({ label, key, placeholder, type }) => (
           <div key={key}>
             <label className="text-[10px] font-mono uppercase tracking-widest block mb-1.5" style={{ color: muted }}>{label}</label>
@@ -1762,7 +1762,7 @@ function CreateDoneScreen({ eventData, onEnterEvent, onHome }: { eventData: Even
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-[10px] font-mono uppercase tracking-widest" style={{ color: muted }}>Event Created</p>
-          <h2 className="text-xl font-bold mt-0.5" style={{ color: ink, letterSpacing: "-0.02em" }}>{eventData.name || "Event Pulse '26"}</h2>
+          <h2 className="text-xl font-bold mt-0.5" style={{ color: ink, letterSpacing: "-0.02em" }}>{eventData.name || "PINPOINT '26"}</h2>
           <p className="text-xs mt-0.5" style={{ color: muted }}>{eventData.venue || "IIT Delhi"}</p>
         </div>
         <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(22,163,74,0.12)" }}>
@@ -1963,7 +1963,7 @@ function ScanScreen({ title, sub, accentColor, onJoin, onBack, extraContent, onD
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: decodeError ? "#dc2626" : "#10b981" }} />
                 <p className="text-sm font-medium" style={{ color: decodeError ? "#dc2626" : "#15803d" }}>
-                  {decodeError ?? (onDecode ? `QR detected: ${decoded}` : "QR detected: Event Pulse '26")}
+                  {decodeError ?? (onDecode ? `QR detected: ${decoded}` : "QR detected: PINPOINT '26")}
                 </p>
               </div>
             </div>
@@ -2201,7 +2201,7 @@ function MyReportsSheet({ reports, userName, onClose }: { reports: Report[]; use
                 </span>
               </div>
               <p className="text-sm font-semibold" style={{ color: ink }}>{r.description}</p>
-      <ReportCount report={r} showSuggestion />
+              <ReportCount report={r} />
               <p className="text-[10px] font-mono mt-1" style={{ color: dimmed }}>{r.time}</p>
             </div>
           ))}
@@ -3554,7 +3554,7 @@ export default function App() {
   };
 
   const approvedReports = reports.filter(isLiveReport);
-  const eventName = activeEvent?.name ?? ((eventData.name?.trim()) || "Event Pulse '26");
+  const eventName = activeEvent?.name ?? ((eventData.name?.trim()) || "PINPOINT '26");
   // Empty, never a place name: asserting a specific venue we were not given
   // would be confidently wrong. MapHeader's venue line is its last child, so an
   // empty string collapses it to zero height and moves nothing.
@@ -4198,7 +4198,7 @@ export default function App() {
           style={{ color: "var(--muted-2)", paddingTop: "calc(0.75rem + env(safe-area-inset-top))" }}>
           {/* The row stays on every screen for the notch inset; only the
               label is hidden on the login screen, whose own title names the app. */}
-          {screen !== "login" ? <span className="text-[11px] font-mono font-medium">EventPulse</span> : <span />}
+          {screen !== "login" ? <span className="text-[11px] font-mono font-medium">PINPOINT</span> : <span />}
           <ThemeToggle />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 relative">

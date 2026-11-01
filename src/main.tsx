@@ -19,7 +19,7 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('EventPulse crashed:', error, info.componentStack)
+    console.error('PINPOINT crashed:', error, info.componentStack)
   }
 
   render() {
@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component<
             Something went wrong
           </h1>
           <p className="text-sm mt-1" style={{ color: muted }}>
-            Event Pulse hit an unexpected error.
+            PINPOINT hit an unexpected error.
           </p>
         </div>
         <pre

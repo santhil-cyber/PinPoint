@@ -12,7 +12,8 @@ export const candidates = internalQuery({
   returns: v.union(v.null(), v.object({ report: schema.doc("reports"), candidates: v.array(schema.doc("incidents")) })),
   handler: async (ctx, { reportId, now }) => {
     const report = await ctx.db.get("reports", reportId);
-    if (!report || report.status === "rejected" || report.isSimulated || env.EVENTPULSE_AI_ENABLED !== "true" || !env.OPENAI_API_KEY || !env.OPENAI_TEXT_MODEL) return null;
+    const isAiEnabled = env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true";
+    if (!report || report.status === "rejected" || report.isSimulated || !isAiEnabled || !env.OPENAI_API_KEY || !env.OPENAI_TEXT_MODEL) return null;
     const settings = await ctx.db.query("aiSettings").withIndex("by_eventId", q => q.eq("eventId", report.eventId)).unique();
     if (settings?.mode !== "assist") return null;
     const type = classifyIncident(report.description).incidentType;

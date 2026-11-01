@@ -1,4 +1,4 @@
-# 🛡️ EventPulse AI Command Center — Professional Feature Report
+# 🛡️ PINPOINT AI Command Center — Professional Feature Report
 
 > **Multi-Agent Autonomous Incident Response System for Live Events**
 >
@@ -25,14 +25,16 @@
 
 ## 1. Executive Summary
 
-**EventPulse AI Command Center** is a production-grade, multi-agent autonomous incident response system designed for live event safety management. It demonstrates how **five specialized AI agents**, coordinated by a central orchestrator, can autonomously detect, verify, analyze, route, and respond to safety incidents — all in real-time — while maintaining strict **human-in-the-loop safety gates** for critical decisions.
+**PINPOINT AI Command Center** is a production-grade, multi-agent autonomous incident response system designed for live event safety management. It demonstrates how **five specialized AI agents**, coordinated by a central orchestrator, can autonomously detect, verify, analyze, route, and respond to safety incidents — all in real-time — while maintaining strict **human-in-the-loop safety gates** for critical decisions.
+
+**Live Demo:** [eventpulse-zeta.vercel.app](https://eventpulse-zeta.vercel.app)
 
 > [!IMPORTANT]
-> **Why Agentic AI?** Unlike traditional monolithic systems that require manual intervention at every step, EventPulse deploys *autonomous agents* that independently perceive, reason, and act. Each agent is a specialist — just like a real emergency response team — and they coordinate through a pipeline that mirrors real-world incident command structures. The system doesn't just alert; it **thinks, verifies, and responds**.
+> **Why Agentic AI?** Unlike traditional monolithic systems that require manual intervention at every step, PINPOINT deploys *autonomous agents* that independently perceive, reason, and act. Each agent is a specialist — just like a real emergency response team — and they coordinate through a pipeline that mirrors real-world incident command structures. The system doesn't just alert; it **thinks, verifies, and responds**.
 
 ### Key Differentiators
 
-| Aspect | Traditional System | EventPulse Agentic AI |
+| Aspect | Traditional System | PINPOINT Agentic AI |
 |--------|-------------------|----------------------|
 | Incident Detection | Manual reporting only | **NLP classification + multi-modal vision** |
 | Verification | Human review queue | **Autonomous cross-source corroboration** |
@@ -403,7 +405,7 @@ flowchart TD
 
 ### Agentic AI Concepts Demonstrated
 
-| Agentic Concept | Where in EventPulse | Why It Matters |
+| Agentic Concept | Where in PINPOINT | Why It Matters |
 |----------------|---------------------|----------------|
 | **Autonomous Perception** | Intake Agent NLP + CV analysis | Agents perceive and interpret raw data without human preprocessing |
 | **Multi-Agent Specialization** | 5 dedicated agents | Complex problems decomposed into expert domains |
@@ -629,7 +631,7 @@ Full pipeline from upload to verification:
 ## 9. Backend Improvements — Planned
 
 > [!NOTE]
-> These improvements would make EventPulse production-ready for real-world deployment.
+> These improvements would make PINPOINT production-ready for real-world deployment.
 
 ### 9.1 Real LLM Integration (Gemini API)
 Replace keyword matching with Gemini API for true NLP classification. Benefits: handles typos, slang, multiple languages, and complex descriptions like "someone's acting weird near the generator" (currently missed by keyword matching).
@@ -720,7 +722,7 @@ NLP keyword dictionaries in multiple languages. Auto-detect report language and 
 3. Submit and watch the **agent pipeline process it live**
 
 ### Closing Statement
-*"EventPulse demonstrates how 5 specialized AI agents can autonomously handle the full incident response lifecycle — from perception to verification to routing to dispatch — while maintaining human oversight through safety gates. Every decision is explainable, every action is logged, and the system adapts in real-time as conditions change."*
+*"PINPOINT demonstrates how 5 specialized AI agents can autonomously handle the full incident response lifecycle — from perception to verification to routing to dispatch — while maintaining human oversight through safety gates. Every decision is explainable, every action is logged, and the system adapts in real-time as conditions change."*
 
 ---
 
@@ -810,4 +812,4 @@ NLP keyword dictionaries in multiple languages. Auto-detect report language and 
 
 ---
 
-*EventPulse AI Command Center — Built with ❤️ for the Agentic AI Hackathon*
+*PINPOINT AI Command Center — Built with ❤️ for the Agentic AI Hackathon*

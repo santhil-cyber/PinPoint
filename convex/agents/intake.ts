@@ -100,7 +100,8 @@ export const processReport = internalMutation({
     const { incidentType, severity } = classifyIncident(report.description, report.priority);
     if (matchedIncidentId) {
       const settings = await ctx.db.query("aiSettings").withIndex("by_eventId", q => q.eq("eventId", report.eventId)).unique();
-      if (settings?.mode !== "assist" || env.EVENTPULSE_AI_ENABLED !== "true" || !env.OPENAI_API_KEY || !env.OPENAI_TEXT_MODEL
+      const isAiEnabled = env.PINPOINT_AI_ENABLED === "true" || env.EVENTPULSE_AI_ENABLED === "true";
+      if (settings?.mode !== "assist" || !isAiEnabled || !env.OPENAI_API_KEY || !env.OPENAI_TEXT_MODEL
         || !Number.isFinite(similarityScore) || (similarityScore ?? 0) < 0.95) {
         matchedIncidentId = undefined;
         similarityScore = undefined;

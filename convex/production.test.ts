@@ -678,3 +678,60 @@ test("reporter count urgency thresholds preserve single-source uncertainty", () 
   expect(sourcePriority(3)).toBe("high");
   expect(sourcePriority(5)).toBe("critical");
 });
+
+test("screenshot EN/Hinglish pair increments the first card immediately with AI off", async () => {
+  const f = await fixture();
+  await f.t.run(ctx => ctx.db.delete("reports", f.reportId));
+  const first = await f.attendeeClient.mutation(api.reports.create, {
+    eventId:f.eventId,clientId:"screenshot-first",description:"Fire lag gyi hai",pinX:40,pinY:40,
+  });
+  const userId = await f.t.run(async ctx => {
+    const userId = await ctx.db.insert("users",{name:"Second witness"});
+    await ctx.db.insert("memberships",{eventId:f.eventId,userId,role:"ATTENDEE",isBanned:false,trustScore:60,joinedAt:Date.now()});
+    return userId;
+  });
+  vi.setSystemTime(Date.now()+10_000);
+  await f.t.withIdentity({subject:userId}).mutation(api.reports.create, {
+    eventId:f.eventId,clientId:"screenshot-second",description:"fire breakout",pinX:40.5,pinY:40,
+  });
+  // Do not advance scheduler: there must already be just one card on submit.
+  const cards = await f.staff.query(api.reports.listForStaff,{eventId:f.eventId});
+  expect(cards).toHaveLength(1);
+  expect(cards[0]).toMatchObject({id:first,description:"Fire lag gyi hai",reporterCount:2,reportCount:2,status:"pending"});
+  const incidents = await f.t.run(ctx => ctx.db.query("incidents").withIndex("by_event_created",q=>q.eq("eventId",f.eventId)).take(10));
+  expect(incidents).toHaveLength(1);
+  await f.staff.mutation(api.reports.updateStatus,{reportId:first,status:"approved"});
+  expect((await f.staff.query(api.reports.listForStaff,{eventId:f.eventId}))[0].status).toBe("approved");
+});
+
+test("existing separately linked EN/Hinglish reports reconcile onto the first card", async () => {
+  const f = await fixture();
+  await f.t.run(ctx => ctx.db.patch("reports",f.reportId,{description:"Fire lag gyi hai"}));
+  const first = await intake(f);
+  vi.setSystemTime(Date.now()+10_000);
+  const second = await f.t.run(async ctx => {
+    const userId = await ctx.db.insert("users",{name:"Witness"});
+    await ctx.db.insert("memberships",{eventId:f.eventId,userId,role:"ATTENDEE",isBanned:false,trustScore:60,joinedAt:Date.now()});
+    const reportId = await ctx.db.insert("reports",{eventId:f.eventId,reporterId:userId,description:"fire breakout",location:"Pinned on map",pinX:20.5,pinY:20,status:"pending",views:0,resolved:false,clientId:"old-bug",createdAt:Date.now()});
+    const incident = await ctx.db.get("incidents",first.incidentId);
+    const {_id,_creationTime:_time,...fields}=incident!;
+    const incidentId = await ctx.db.insert("incidents",{...fields,description:"fire breakout",incidentCode:"OLD-DUPLICATE",createdAt:Date.now()});
+    await ctx.db.insert("incidentReports",{incidentId,reportId,isOriginal:true,similarityScore:1,addedAt:Date.now()});
+    return {reportId,incidentId};
+  });
+  const cards = await f.staff.query(api.reports.listForStaff,{eventId:f.eventId});
+  expect(cards).toHaveLength(1);
+  expect(cards[0]).toMatchObject({id:f.reportId,reporterCount:2,reportCount:2});
+  await f.staff.mutation(api.reports.updateStatus,{reportId:second.reportId,status:"approved"});
+  expect((await f.staff.query(api.reports.listForStaff,{eventId:f.eventId}))[0]).toMatchObject({id:f.reportId,status:"approved"});
+});
+
+test("short fire synonyms never merge distant pins, negated reports or different places", () => {
+  const a={description:"fire breakout",incidentType:"fire",pinX:20,pinY:20};
+  expect(duplicateScore(a,{...a,description:"Fire lag gyi hai"})).toBe(1);
+  expect(duplicateScore(a,{...a,description:"aag lag gayi hai"})).toBe(1);
+  expect(duplicateScore(a,{...a,description:"आग लगी है"})).toBe(1);
+  expect(duplicateScore(a,{...a,description:"Fire lag gyi hai",pinX:80})).toBe(0);
+  expect(duplicateScore(a,{...a,description:"no fire here"})).toBe(0);
+  expect(duplicateScore(a,{...a,description:"fire in the kitchen"})).toBe(0);
+});
